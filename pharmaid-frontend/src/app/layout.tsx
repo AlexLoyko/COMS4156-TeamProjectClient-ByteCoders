@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Box } from "@mui/material";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,10 +26,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <title>Emergency Aid</title>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+       <Box
+         sx={{
+           display: 'flex',
+           justifyContent: 'center',
+           alignItems: 'center',
+           minHeight: '100vh'
+         }}
+       >
         {children}
+       </Box>
       </body>
     </html>
   );
