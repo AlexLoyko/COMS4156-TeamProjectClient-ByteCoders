@@ -1,101 +1,94 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState } from "react";
+import {Box, CircularProgress, Container, Autocomplete, TextField, Stack, Tooltip, Typography} from "@mui/material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { SESSION_STORAGE_KEY } from "@/app/common/constants";
+import { useRouter } from 'next/navigation';
+import axios from "axios";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [patients, setPatiens] = useState([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  useEffect(() => {
+    const token = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    axios.get('/api/patients', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then((response) => {
+      setIsLoading(false);
+      setPatiens(response.data);
+      console.log(response.data);
+    })
+    .catch(err => {
+      console.log(err);
+      router.push('/login')
+    })
+  }, []);
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  return (
+    <Container maxWidth="sm">
+      <Typography sx={{ textAlign: 'center', marginBottom: 3 }} variant="h3">Emergency Aid</Typography>
+      <Box>
+        <Autocomplete
+          options={patients}
+          getOptionLabel={(patient) => `${patient.firstName} ${patient.lastName}`}
+          getOptionDisabled={(patient) => !patient.pharmaId}
+          onChange={(event, patient) => {
+            console.log(patient);
+            router.push(`/patient/${patient.id}`)
+          }}
+          renderOption={(props, patient) => {
+            return patient.pharmaId ?
+              (
+                <li {...props} key={patient.id}>
+                  <Stack sx={{gap: 1}} direction="row" useFlexGap={true}>
+                    {`${patient.firstName} ${patient.lastName}`}
+                    <Tooltip title="PharmaId available">
+                      <CheckCircleIcon sx={{fill: 'green'}}/>
+                    </Tooltip>
+                  </Stack>
+                </li>
+              ) :
+              (
+                <li {...props} key={patient.id}>
+                  <Stack sx={{gap: 1}} direction="row" useFlexGap={true}>
+                    {`${patient.firstName} ${patient.lastName}`}
+                    <Tooltip title="PharmaId not available">
+                      <CancelIcon sx={{fill: 'darkred'}}/>
+                    </Tooltip>
+                  </Stack>
+                </li>
+              )
+          }}
+          renderInput={(params) =>
+            <TextField
+              {...params}
+              fullWidth
+              placeholder="Enter patient's name"
+              label="Patients"
+              variant="outlined"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          }
+        />
+      </Box>
+    </Container>
   );
 }
+
