@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import {Box, CircularProgress, Container, Autocomplete, TextField, Stack, Tooltip, Typography} from "@mui/material";
+import { Box, CircularProgress, Container, Autocomplete, TextField, Stack, Tooltip, Typography } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { SESSION_STORAGE_KEY } from "@/app/common/constants";
 import { useRouter } from 'next/navigation';
 import axios from "axios";
+import { Patient } from "@/app/types";
 
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [patients, setPatiens] = useState([]);
+  const [patients, setPatiens] = useState<Patient[]>([]);
 
   useEffect(() => {
     const token = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
@@ -48,11 +48,13 @@ export default function Home() {
       <Box>
         <Autocomplete
           options={patients}
-          getOptionLabel={(patient) => `${patient.firstName} ${patient.lastName}`}
-          getOptionDisabled={(patient) => !patient.pharmaId}
+          getOptionLabel={(patient: Patient) => `${patient.firstName} ${patient.lastName}`}
+          getOptionDisabled={(patient: Patient) => !patient.pharmaId}
           onChange={(event, patient) => {
             console.log(patient);
-            router.push(`/patient/${patient.id}`)
+            if (patient) {
+              router.push(`/patient/${patient.id}`);
+            }
           }}
           renderOption={(props, patient) => {
             return patient.pharmaId ?
@@ -68,10 +70,10 @@ export default function Home() {
               ) :
               (
                 <li {...props} key={patient.id}>
-                  <Stack sx={{gap: 1}} direction="row" useFlexGap={true}>
+                  <Stack sx={{ gap: 1 }} direction="row" useFlexGap={true}>
                     {`${patient.firstName} ${patient.lastName}`}
                     <Tooltip title="PharmaId not available">
-                      <CancelIcon sx={{fill: 'darkred'}}/>
+                      <CancelIcon sx={{ fill: 'darkred' }}/>
                     </Tooltip>
                   </Stack>
                 </li>

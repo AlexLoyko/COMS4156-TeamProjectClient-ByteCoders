@@ -26,7 +26,8 @@ export default function SignUp() {
       await axios.post('/api/register', payload);
       router.push('/login');
     } catch (err) {
-      const errorMessage = err.response.data;
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const errorMessage = (err as any).response.data;
       setIsLoading(false);
       setErrorMessage(errorMessage);
     }
