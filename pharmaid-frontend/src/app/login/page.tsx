@@ -33,7 +33,8 @@ export default function LoginPage() {
           window.sessionStorage.setItem(SESSION_STORAGE_KEY, data.token);
           router.push('/');
         } catch (err) {
-          const errorMessage = err.response.data;
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          const errorMessage = (err as any).response.data;
           setIsLoading(false);
           setErrorMessage(errorMessage);
         }
